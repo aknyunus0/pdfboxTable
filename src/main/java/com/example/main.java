@@ -74,6 +74,9 @@ public class main {
 		table.addCell(STATUS, tableHeaderColor);
 		table.addCell(BALANCE, tableHeaderColor);
 		
+		table.addCell("Enes AKIN Enes ", tableHeaderColor);
+		table.addCell("", tableHeaderColor);
+		
 		
 		
 		
