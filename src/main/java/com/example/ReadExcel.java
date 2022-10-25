@@ -3,6 +3,7 @@ package com.example;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,11 +23,12 @@ public class ReadExcel {
 		
 		//Birden fazla gruplamak istendiðinde
 		Map<String, Map<String, List<AccountTableEntity>>> multiMap = accountList.stream()
-				.collect(Collectors.groupingBy(AccountTableEntity::getStatus, Collectors.groupingBy(AccountTableEntity::getAccountTypeName)));
+				.collect(Collectors.groupingBy(AccountTableEntity::getAccountTypeName, Collectors.groupingBy(AccountTableEntity::getStatus)));
 		
 		//Tekli gruplama yapmak istenildiðinde
 		Map<String,  List<AccountTableEntity>> singleMap = accountList.stream()
 				.collect(Collectors.groupingBy(AccountTableEntity::getStatus));
 		
+			
 	}
 }

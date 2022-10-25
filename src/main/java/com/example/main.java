@@ -1,7 +1,14 @@
 package com.example;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -9,6 +16,8 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+
+import com.poiji.bind.Poiji;
 
 
 public class main {
@@ -21,6 +30,17 @@ public class main {
 	private static final String BALANCE="BALANCE";
 
 	public static void main(String[] args) throws IOException {
+		
+		File file = new File("Account_info.xlsx");
+		List<AccountTableEntity> accountList = Poiji.fromExcel(file, AccountTableEntity.class);	
+		
+		
+		//Birden fazla gruplamak istendiðinde
+		Map<String, Map<String, List<AccountTableEntity>>> multiMap = accountList.stream()
+				.collect(Collectors.groupingBy(AccountTableEntity::getAccountTypeName, Collectors.groupingBy(AccountTableEntity::getStatus)));
+		
+				
+		
 		PDDocument document =new PDDocument();
 		PDPage firsPage=new PDPage(PDRectangle.A4);
 		document.addPage(firsPage);
@@ -74,12 +94,62 @@ public class main {
 		table.addCell(STATUS, tableHeaderColor);
 		table.addCell(BALANCE, tableHeaderColor);
 		
-		table.addCell("Enes AKIN Enes ", tableHeaderColor);
+	
+		double grantTotal=0.0;	
+		for (Entry<String, Map<String, List<AccountTableEntity>>> entry : multiMap.entrySet()) {
+			table.addCell("ACCOUNT_TYPE_NAME:"+entry.getKey(), tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			
+			double toplam2=0.0;
+			for (Entry<String, List<AccountTableEntity>> entry2 : entry.getValue().entrySet()) {
+				table.addCell("Status:"+entry2.getKey(), tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				
+				double toplam=0.0;
+				List<AccountTableEntity> infoList=entry2.getValue();
+				for (AccountTableEntity info : infoList) {
+					table.addCell(info.getFirstName(), tableHeaderColor);
+					table.addCell(info.getLastName(), tableHeaderColor);
+					table.addCell(info.getAccountTypeName(), tableHeaderColor);
+					table.addCell(""+info.getAlias(), tableHeaderColor);
+					table.addCell(info.getStatus(), tableHeaderColor);
+					table.addCell(""+info.getBalance(), tableHeaderColor);
+					toplam=toplam+info.getBalance();
+				}
+				
+				table.addCell("", tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				table.addCell("", tableHeaderColor);
+				table.addCell("Toplam: ", tableHeaderColor);
+				table.addCell(""+toplam, tableHeaderColor);
+				toplam2=toplam2+toplam;
+				
+			}
+			table.addCell("", tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			table.addCell("", tableHeaderColor);
+			table.addCell("Toplam2 : ", tableHeaderColor);
+			table.addCell(""+toplam2, tableHeaderColor);
+			grantTotal=grantTotal+toplam2;
+			
+		}
+		
 		table.addCell("", tableHeaderColor);
-		
-		
-		
-		
+		table.addCell("", tableHeaderColor);
+		table.addCell("", tableHeaderColor);
+		table.addCell("", tableHeaderColor);
+		table.addCell("Grant Total : ", tableHeaderColor);
+		table.addCell(""+grantTotal, tableHeaderColor);
 
 		
 		
