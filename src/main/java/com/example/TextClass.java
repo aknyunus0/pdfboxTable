@@ -19,7 +19,7 @@ public class TextClass {
 		this.contentStream = contentStream;
 	}
 	
-	void addSingelLine(String text,int xPosition,int yPosition,PDFont font,float fontSize,Color color) throws IOException {
+	 void addSingelLine(String text,int xPosition,int yPosition,PDFont font,float fontSize,Color color) throws IOException {
 		contentStream.beginText();
 		contentStream.setFont(font, fontSize);
 		contentStream.setNonStrokingColor(color);
