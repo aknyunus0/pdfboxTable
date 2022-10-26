@@ -48,13 +48,30 @@ public class main {
 				
 		int pageWidth=(int) firsPage.getTrimBox().getWidth();
 		int pageHeight=(int) firsPage.getTrimBox().getHeight();	
+		PDFont font=PDType1Font.TIMES_ROMAN;
+		PDFont fonttitle=PDType1Font.TIMES_ROMAN.TIMES_BOLD;
+		
+		
+		TextClass textClass=new TextClass(document, contentStream);
+		
+		textClass.addSingelLine("Account Balance Report", 220, 820, fonttitle, 18, Color.BLACK);
+		textClass.addSingelLine("Group By : ACCOUNT_TYPE_NAME & STATUS", 25,780, font, 12, Color.BLACK);
+		textClass.addSingelLine("Date: 26.10.2022", 475, 780, font, 12, Color.BLACK);
+		textClass.addSingelLine("Report - Page 1", 250, 40, font, 10, Color.BLACK);
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		TableClass table =new TableClass(document, contentStream);
 		
 		System.out.println("pageHeight : "+pageHeight);
 		
-		PDFont font=PDType1Font.TIMES_ROMAN;
+		
 		
 		
 		float fontWidthFIRS_NAME =font.getStringWidth(FIRS_NAME)/1000*11+20;
@@ -72,20 +89,23 @@ public class main {
 		System.out.println("fontWidthBALANCE : "+fontWidthBALANCE);
 		
 		int [] cellwidths= {
-				(int) fontWidthFIRS_NAME,
+				(int) fontWidthACCOUNT_TYPE_NAME-5,
 				(int) fontWidthLAST_NAME,
-				(int) fontWidthACCOUNT_TYPE_NAME,
-				(int) fontWidthALIAS,
-				(int) fontWidthSTATUS,
+				(int) fontWidthFIRS_NAME+10,
+				(int) fontWidthALIAS+8,
+				(int) fontWidthACCOUNT_TYPE_NAME-7,
 				(int) fontWidthBALANCE};	
 		
 		
-		table.setTable(cellwidths, 30, 5, 800);
-		table.setTableFont(font, 11, Color.BLACK);
+		table.setTable(cellwidths, 20, 5, pageHeight-100);
+		table.setTableFont(font, 7, Color.BLACK);
 			
 		
-		Color tableHeaderColor=new Color(240,93,11);
-		Color tableBodyColor=new Color(219,218,198);
+		Color tableHeaderColor=new Color(0,0,255);
+		Color tableBodyColor=new Color(255,255,255);
+		Color tableSubColor=new Color(255,255,0);
+		Color tableGrandColor=new Color(0,255,0);
+		
 		
 		table.addCell(FIRS_NAME, tableHeaderColor);
 		table.addCell(LAST_NAME, tableHeaderColor);
@@ -97,63 +117,61 @@ public class main {
 	
 		double grantTotal=0.0;	
 		for (Entry<String, Map<String, List<AccountTableEntity>>> entry : multiMap.entrySet()) {
-			table.addCell("ACCOUNT_TYPE_NAME:"+entry.getKey(), tableHeaderColor);
-			table.addCell("", tableHeaderColor);
-			table.addCell("", tableHeaderColor);
-			table.addCell("", tableHeaderColor);
-			table.addCell("", tableHeaderColor);
-			table.addCell("", tableHeaderColor);
+			table.addCell("ACCOUNT_TYPE_NAME:"+entry.getKey(), tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
 			
-			double toplam2=0.0;
+			double AccSubtotal=0.0;
 			for (Entry<String, List<AccountTableEntity>> entry2 : entry.getValue().entrySet()) {
-				table.addCell("Status:"+entry2.getKey(), tableHeaderColor);
-				table.addCell("", tableHeaderColor);
-				table.addCell("", tableHeaderColor);
-				table.addCell("", tableHeaderColor);
-				table.addCell("", tableHeaderColor);
-				table.addCell("", tableHeaderColor);
+				table.addCell("Status:"+entry2.getKey(), tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
 				
-				double toplam=0.0;
+				double Status_SubTotal=0.0;
 				List<AccountTableEntity> infoList=entry2.getValue();
 				for (AccountTableEntity info : infoList) {
-					table.addCell(info.getFirstName(), tableHeaderColor);
-					table.addCell(info.getLastName(), tableHeaderColor);
-					table.addCell(info.getAccountTypeName(), tableHeaderColor);
-					table.addCell(""+info.getAlias(), tableHeaderColor);
-					table.addCell(info.getStatus(), tableHeaderColor);
-					table.addCell(""+info.getBalance(), tableHeaderColor);
-					toplam=toplam+info.getBalance();
+					table.addCell(info.getFirstName(), tableBodyColor);
+					table.addCell(info.getLastName(), tableBodyColor);
+					table.addCell(info.getAccountTypeName(), tableBodyColor);
+					table.addCell(" ", tableBodyColor);
+					table.addCell(info.getStatus(), tableBodyColor);
+					table.addCell(""+info.getBalance()/100, tableBodyColor);
+					Status_SubTotal=Status_SubTotal+info.getBalance();
 				}
 				
-				table.addCell("", tableHeaderColor);
-				table.addCell("", tableHeaderColor);
-				table.addCell("", tableHeaderColor);
-				table.addCell("", tableHeaderColor);
-				table.addCell("Toplam: ", tableHeaderColor);
-				table.addCell(""+toplam, tableHeaderColor);
-				toplam2=toplam2+toplam;
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("Status SubTotal ", tableSubColor);
+				table.addCell(""+Status_SubTotal/100, tableSubColor);
+				AccSubtotal=AccSubtotal+Status_SubTotal;
 				
 			}
-			table.addCell("", tableHeaderColor);
-			table.addCell("", tableHeaderColor);
-			table.addCell("", tableHeaderColor);
-			table.addCell("", tableHeaderColor);
-			table.addCell("Toplam2 : ", tableHeaderColor);
-			table.addCell(""+toplam2, tableHeaderColor);
-			grantTotal=grantTotal+toplam2;
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("Account Type Name Subtotal", tableSubColor);
+			table.addCell(""+AccSubtotal/100, tableSubColor);
+			grantTotal=grantTotal+AccSubtotal;
 			
 		}
 		
-		table.addCell("", tableHeaderColor);
-		table.addCell("", tableHeaderColor);
-		table.addCell("", tableHeaderColor);
-		table.addCell("", tableHeaderColor);
-		table.addCell("Grant Total : ", tableHeaderColor);
-		table.addCell(""+grantTotal, tableHeaderColor);
+		table.addCell("", tableBodyColor);
+		table.addCell("", tableBodyColor);
+		table.addCell("", tableBodyColor);
+		table.addCell("GRAND TOTAL", tableGrandColor);
+		table.addCell("", tableGrandColor);
+		table.addCell(""+grantTotal/100, tableGrandColor);
 
-		
-		
-				
+						
 		contentStream.close();
 		document.save("mypdf.pdf");
 		document.close();

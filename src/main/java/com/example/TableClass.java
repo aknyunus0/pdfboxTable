@@ -43,7 +43,7 @@ public class TableClass {
 	}
 	
 	void addCell(String text, Color fillColor) throws IOException {
-		contentStream.setStrokingColor(1f);
+		contentStream.setStrokingColor(fillColor);
 		if (fillColor != null) {
 			contentStream.setNonStrokingColor(fillColor);
 			
