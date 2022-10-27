@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
+
 import com.poiji.bind.Poiji;
 
 
@@ -20,7 +22,8 @@ public class ReadExcel {
 		File file = new File("Account_info.xlsx");
 		List<AccountTableEntity> accountList = Poiji.fromExcel(file, AccountTableEntity.class);	
 		
-		
+		List<KeyValue> accountList2 = Poiji.fromExcel(file, KeyValue.class);	
+		System.out.println(accountList2.toString());
 		//Birden fazla gruplamak istendiðinde
 		Map<String, Map<String, List<AccountTableEntity>>> multiMap = accountList.stream()
 				.collect(Collectors.groupingBy(AccountTableEntity::getAccountTypeName, Collectors.groupingBy(AccountTableEntity::getStatus)));
