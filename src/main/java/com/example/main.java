@@ -4,12 +4,18 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -18,15 +24,21 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.poiji.bind.Poiji;
 
-
+@SpringBootApplication
 public class main {
-	
-	
+	private static List<String> buildClassificationFunction(Map<String,String> map, List<String> fields) {
+	    return fields.stream()
+	            .map(map::get)
+	            .collect(Collectors.toList());
+	}
 
 	public static void main(String[] args) throws IOException {
+		SpringApplication.run(main.class, args);
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		Date date = new Date();  
@@ -35,13 +47,49 @@ public class main {
 		List<AccountTableEntity> accountList = Poiji.fromExcel(file, AccountTableEntity.class);	
 		
 		
-		//Birden fazla gruplamak istendiðinde
-		Map<String, Map<String, List<AccountTableEntity>>> multiMap = accountList.stream()
-				.collect(Collectors.groupingBy(AccountTableEntity::getAccountTypeName, Collectors.groupingBy(AccountTableEntity::getStatus)));
-		//Tekli gruplama yapmak istenildiðinde
-		Map<String,  List<AccountTableEntity>> singleMap = accountList.stream()
-				.collect(Collectors.groupingBy(AccountTableEntity::getStatus));
+
+		Map<String, Function<AccountTableEntity, Object>> extractors = new HashMap<>();
+		extractors.put("FIRST_NAME", AccountTableEntity::getFirstName);
+		extractors.put("LAST_NAME", AccountTableEntity::getLastName);
+		extractors.put("ACCOUNT_TYPE_NAME", AccountTableEntity::getAccountTypeName);
+		extractors.put("ALIAS", AccountTableEntity::getAlias);
+		extractors.put("STATUS", AccountTableEntity::getStatus);
+		extractors.put("BALANCE", AccountTableEntity::getBalance);
 		
+		
+		
+		Map<String,String>  attributes =new HashMap<>(); // get attributes from JSON (left as exercise)
+		attributes.put("ACCOUNT_TYPE_NAME", "STATUS");
+
+		//attributes.add(2,"FIRST_NAME");
+		
+		List<String> att=new ArrayList<>();
+		att.add("ACCOUNT_TYPE_NAME");
+		//att.add("STATUS");
+		
+
+		Function<AccountTableEntity, List<Object>> classifier = emp -> att.stream()
+				    .map(attr -> extractors.get(attr).apply(emp))
+				    .collect(Collectors.toList());
+				
+		
+			Map<List<Object>, List<AccountTableEntity>> mapend = accountList.stream()
+					    .collect(Collectors.groupingBy(s -> classifier.apply(s), Collectors.toList()));
+		
+			
+		Map<List<Object>, List<AccountTableEntity>> mapend2=new HashMap<>();
+		
+		for (Entry<List<Object>, List<AccountTableEntity>> entry : mapend.entrySet()) {
+			List<AccountTableEntity> infoList=new ArrayList<>();
+			infoList=entry.getValue();
+			Map<String, List<AccountTableEntity>> 	mapend1=infoList.stream().collect(Collectors.groupingBy(AccountTableEntity::getStatus,Collectors.toList()));
+			infoList=mapend1.entrySet().iterator().next().getValue();
+			
+			mapend2.put(entry.getKey(), infoList);
+			
+			
+		}
+	
 				
 		
 		PDDocument document =new PDDocument();
@@ -109,10 +157,140 @@ public class main {
 		table.addCell(TableClass.STATUS, tableHeaderColor);
 		table.addCell(TableClass.BALANCE, tableHeaderColor);
 		
+		System.out.println(mapend2);
+		
 	
+		
+		for(Entry<List<Object>, List<AccountTableEntity>> entry : mapend.entrySet()) {
+			//entry.getKey().set(0, "Yunus");
+			System.out.println(entry.getKey());
+			List<AccountTableEntity> infoList=new ArrayList<>();			
+					
+			
+			for(int i=0;i<entry.getKey().size();i++){	
+				
+				table.addCell("RESULT::  "+entry.getKey().get(i).toString(), tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				table.addCell("", tableBodyColor);
+				
+			
+							
+			}
+			
+			
+			
+			
+			for (AccountTableEntity info :infoList) {
+				
+   				table.addCell(info.getFirstName(), tableBodyColor);
+				table.addCell(""+info.getLastName(), tableBodyColor);
+				table.addCell(""+info.getAccountTypeName(), tableBodyColor);
+				table.addCell(" ", tableBodyColor);
+				table.addCell("" +info.getStatus(), tableBodyColor);
+				table.addCell(" "+info.getBalance()/100, tableBodyColor);
+			
+			}
+			
+
+				
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("", tableBodyColor);
+			table.addCell("Status SubTotal ", tableSubColor);
+			table.addCell("", tableSubColor);
+			
+		}
+		
+		
+		
+		table.addCell("", tableBodyColor);
+		table.addCell("", tableBodyColor);
+		table.addCell("", tableBodyColor);
+		table.addCell("GRAND TOTAL", tableGrandColor);
+		table.addCell("", tableGrandColor);
+		table.addCell("", tableGrandColor); 
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+/*		
+		int x=0;
+		List<AccountTableEntity> resutList=new ArrayList<AccountTableEntity>();
+       for(Map<String,  List<AccountTableEntity>> map: mapList) {
+    	   if(columnSelected.length!=x+1) {
+    	   AccountTableEntity tableclas=new AccountTableEntity();
+    	   List<AccountTableEntity> infoList=new ArrayList<AccountTableEntity>();
+    	   
+        	for(Entry<String, List<AccountTableEntity>> entry: map.entrySet()) {
+        		List<AccountTableEntity> resuList=new ArrayList<AccountTableEntity>();
+    			/*table.addCell("Result With key:"+entry.getKey(), tableBodyColor);
+    			table.addCell("", tableBodyColor);
+    			table.addCell("", tableBodyColor);
+    			table.addCell("", tableBodyColor);
+    			table.addCell("", tableBodyColor);
+    			table.addCell("", tableBodyColor); 			
+        		infoList=entry.getValue();
+    		//	tableclas.setFirstName("SONUC??? "+entry.getKey());
+    		//	infoList.add(0,tableclas);
+    			
+    			for(Entry<String, List<AccountTableEntity>> entry2: mapList.get(x+1).entrySet()) {   				
+    				List<AccountTableEntity> list = infoList.stream()
+    					    .filter(entry2.getValue()::contains).filter(resutList::contains)
+    					    .distinct()
+    					    .collect(Collectors.toList()); 
+    					resuList.addAll(list);
+    					System.out.println(entry.getKey());
+    					System.out.println(entry2.getKey());
+    					System.out.println(resuList.toArray().length);
+
+    			}
+    			
+    			resutList.addAll(resuList);
+    			for (AccountTableEntity info : resuList) {
+    				System.out.println(info.firstName);
+    				
+    				table.addCell(info.getFirstName(), tableBodyColor);
+    				table.addCell(""+info.getLastName(), tableBodyColor);
+    				table.addCell(""+info.getAccountTypeName(), tableBodyColor);
+    				table.addCell(" ", tableBodyColor);
+    				table.addCell("" +info.getStatus(), tableBodyColor);
+    				if(info.getBalance()==null)table.addCell(" ", tableBodyColor);
+    				else table.addCell(" "+info.getBalance()/100, tableBodyColor);
+    				//Status_SubTotal=Status_SubTotal+info.getBalance();
+    			
+    		}
+       	}
+        	
+       }	
+        x++;	
+
+        	
+       } */
+		
+		
+		
+		
+		
+		
+	/*
 		double grantTotal=0.0;	
 		for (Entry<String, Map<String, List<AccountTableEntity>>> entry : multiMap.entrySet()) {
-			if (pageHeight>50) {
+			
 			table.addCell("ACCOUNT_TYPE_NAME:"+entry.getKey(), tableBodyColor);
 			table.addCell("", tableBodyColor);
 			table.addCell("", tableBodyColor);
@@ -122,7 +300,7 @@ public class main {
 			
 			double AccSubtotal=0.0;
 			for (Entry<String, List<AccountTableEntity>> entry2 : entry.getValue().entrySet()) {
-				if (pageHeight>50) {
+				
 				table.addCell("Status:"+entry2.getKey(), tableBodyColor);
 				table.addCell("", tableBodyColor);
 				table.addCell("", tableBodyColor);
@@ -133,7 +311,7 @@ public class main {
 				double Status_SubTotal=0.0;
 				List<AccountTableEntity> infoList=entry2.getValue();
 				for (AccountTableEntity info : infoList) {
-					if (pageHeight>50) {
+					
 						table.addCell(info.getFirstName(), tableBodyColor);
 						table.addCell(info.getLastName(), tableBodyColor);
 						table.addCell(info.getAccountTypeName(), tableBodyColor);
@@ -141,7 +319,7 @@ public class main {
 						table.addCell(info.getStatus(), tableBodyColor);
 						table.addCell(""+info.getBalance()/100, tableBodyColor);
 						Status_SubTotal=Status_SubTotal+info.getBalance();
-					}
+					
 
 				}
 				
@@ -152,7 +330,7 @@ public class main {
 				table.addCell("Status SubTotal ", tableSubColor);
 				table.addCell(""+Status_SubTotal/100, tableSubColor);
 				AccSubtotal=AccSubtotal+Status_SubTotal;
-				}	
+				
 			}
 			table.addCell("", tableBodyColor);
 			table.addCell("", tableBodyColor);
@@ -162,14 +340,14 @@ public class main {
 			table.addCell(""+AccSubtotal/100, tableSubColor);
 			grantTotal=grantTotal+AccSubtotal;
 		}
-		}
+		
 		
 		table.addCell("", tableBodyColor);
 		table.addCell("", tableBodyColor);
 		table.addCell("", tableBodyColor);
 		table.addCell("GRAND TOTAL", tableGrandColor);
 		table.addCell("", tableGrandColor);
-		table.addCell(""+grantTotal/100, tableGrandColor);
+		table.addCell(""+grantTotal/100, tableGrandColor); */
 
 		table.contentStream.close();			
 		contentStream.close();
@@ -181,6 +359,7 @@ public class main {
 		
 
 	}
+
 	
 }
 	

@@ -4,6 +4,22 @@ import com.poiji.annotation.ExcelCellName;
 
 public class GroupBy {
 	
+	public GroupBy(String firstName, String lastName, String accountTypeName, String alias, String status,
+			Double balance) {
+		super();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.accountTypeName = accountTypeName;
+		this.alias = alias;
+		this.status = status;
+		this.balance = balance;
+	}
+
+	public GroupBy() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	String firstName;
 	
 	
@@ -18,6 +34,7 @@ public class GroupBy {
 	
 	String status;
 	
+	Double balance;
 	
 		
 	public String getFirstName() {

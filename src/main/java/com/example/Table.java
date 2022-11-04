@@ -1,17 +1,30 @@
 package com.example;
 
+import javax.persistence.*;
+
+
+
 public class Table {
 
+
+
 	String FIRST_NAME;
+
 	String LAST_NAME;
+
 	String ACCOUNT_TYPE_NAME;
+
 	String ALIAS;
+	
 	String STATUS;
+
 	double BALANCE;
+	
 
 	public Table(String fIRST_NAME, String lAST_NAME, String aCCOUNT_TYPE_NAME, String aLIAS, String sTATUS,
 			double bALANCE) {
 		super();
+		
 		FIRST_NAME = fIRST_NAME;
 		LAST_NAME = lAST_NAME;
 		ACCOUNT_TYPE_NAME = aCCOUNT_TYPE_NAME;
@@ -19,6 +32,7 @@ public class Table {
 		STATUS = sTATUS;
 		BALANCE = bALANCE;
 	}
+
 
 	public String getFIRST_NAME() {
 		return FIRST_NAME;

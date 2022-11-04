@@ -56,8 +56,6 @@ public class TableClass {
 		Color tableBodyColor=new Color(255,255,255);
 		Color tableSubColor=new Color(255,255,0);
 		Color tableGrandColor=new Color(0,255,0);
-		System.out.println(text+" : xPosition :"+xPosition);
-		System.out.println(text+" : yPosition :"+yPosition);
 		
 		if(yPosition<50) {
 	    yPosition=801;	

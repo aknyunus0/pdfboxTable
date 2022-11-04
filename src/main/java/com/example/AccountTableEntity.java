@@ -1,5 +1,7 @@
 package com.example;
 
+import java.util.ArrayList;
+
 import com.poiji.annotation.ExcelCellName;
 
 public class AccountTableEntity {
@@ -22,9 +24,7 @@ public class AccountTableEntity {
 	@ExcelCellName("BALANCE")
 	Double balance;
 	
-	GroupBy groupBy;
-	
-	
+
 	public String getFirstName() {
 		return firstName;
 	}
